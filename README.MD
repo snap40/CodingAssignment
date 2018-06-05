@@ -45,7 +45,7 @@ Docker container can be started with the following commands:
 The skeleton application is pre-configured to connect to this database instance.
 
 ## Exercise
-* Clone the exercise's repository from GitHub.
+* Clone the exercise's repository from GitHub - https://github.com/snap40/CodingAssignment.
 * Code the `DefaultAssignmentService` class to implement the stories listed above.
 * Add any necessary Spring annotations and configuration required for a fully working, multi-user solution.
 * Add JPA annotations that will ensure data integrity and optimise data access. Bear in mind that, over time, the database will grow and that data access performance must not be adversely affected.
