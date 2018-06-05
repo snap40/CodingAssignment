@@ -10,6 +10,6 @@ public interface AssignmentService {
     void addDeviceToAssignment(String assignmentId, String deviceId);
     void removeDeviceFromAssignment(String assignmentId, String deviceId);
     Assignment findAssignment(String assignmentId);
-    List<Assignment> findAssignmentForDevice(String deviceId);
-    List<Assignment> findAssignmentForPatient(String patientId);
+    List<Assignment> findAssignmentsForDevice(String deviceId);
+    List<Assignment> findAssignmentsForPatient(String patientId);
 }

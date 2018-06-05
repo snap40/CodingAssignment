@@ -42,12 +42,12 @@ public class DefaultAssignmentService implements AssignmentService {
     }
 
     @Override
-    public List<Assignment> findAssignmentForDevice(String deviceId) {
+    public List<Assignment> findAssignmentsForDevice(String deviceId) {
         throw new RuntimeException("Not yet implemented");
     }
 
     @Override
-    public List<Assignment> findAssignmentForPatient(String patientId) {
+    public List<Assignment> findAssignmentsForPatient(String patientId) {
         throw new RuntimeException("Not yet implemented");
     }
 }
