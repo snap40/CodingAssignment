@@ -48,7 +48,8 @@ The skeleton application is pre-configured to connect to this database instance.
 ## Exercise
 * Clone the exercise's repository from GitHub.
 * Code the `DefaultAssignmentService` class to implement the stories listed above.
-* Add any necessary JPA and Spring annotations and configuration required for a fully working, multi-user solution.
+* Add any necessary Spring annotations and configuration required for a fully working, multi-user solution.
+* Add JPA annotations that will ensure data integrity and optimise data access. Bear in mind that, over time, the database will grow and that data access performance must not be adversely affected.
 * Provide unit and integration tests to prove your solution works.
 * Provide an implementation of a REST API for the `AssignmentService`.
 
