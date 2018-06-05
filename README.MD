@@ -1,7 +1,8 @@
 # Device-Patient Assignment Coding Test
 
 ## Scenario
-Patients can be assigned one or more snap40 devices. These assignments are tracked in a relational database.
+Patients can be assigned one or more snap40 devices to monitor their vital signs. These assignments are tracked in a 
+relational database.
 
 An assignment's state is tracked by the `openedTime`, which is set on insert, and `closedTime`, which is set when the 
 assignment is complete. An assignment is considered active if the `closedTime` is null.
