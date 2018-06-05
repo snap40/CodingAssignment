@@ -54,5 +54,5 @@ The skeleton application is pre-configured to connect to this database instance.
 
 # Extension to the basic application
 * How would the application change if patients were grouped and managed by an organisation (identified by an organisation ID)?
-** How would you secure patients' data from access outside of the organisation?
+* How would you secure patients' data from access outside of the organisation?
 * What activity should be audited and how could this be implemented?
