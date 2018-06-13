@@ -1,4 +1,5 @@
 # Device-Patient Assignment Coding Test
+John Cook's magic answer
 
 ## Scenario
 Patients can be assigned one or more snap40 devices to monitor their vital signs. These assignments are tracked in a 
