@@ -64,7 +64,7 @@ will grow and that data access performance must not be adversely affected.
 * Provide an implementation of a REST API for the `AssignmentService`.
 * Extra dependencies can be added to the gradle build script as required. 
 
-# Extension points for later discussion
+## Extension points for later discussion
 * How would the application change if patients were grouped and managed by an organisation (identified by an organisation ID)?
 * How would you secure patients' data from access by someone in a different organisation?
 * What activity should be audited and how could this be implemented?
