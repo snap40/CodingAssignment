@@ -1,30 +1,38 @@
-package com.snap40.assignments.services;
+package com.snap40.assignments.controller;
 
 import com.snap40.assignments.model.Assignment;
 import com.snap40.assignments.model.Device;
-import com.snap40.assignments.repositories.DeviceRepository;
 import com.snap40.assignments.repositories.AssignmentRepository;
+import com.snap40.assignments.repositories.DeviceRepository;
+import com.snap40.assignments.services.AssignmentService;
+import com.snap40.assignments.services.DefaultAssignmentService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.xml.ws.Response;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class DefaultAssignmentService implements AssignmentService {
+@Controller
+public class AssignmentController {
 
-    private final AssignmentRepository assignmentRepository;
-    private final DeviceRepository deviceRepository;
+    @Autowired
+    AssignmentRepository assignmentRepository;
 
-    public DefaultAssignmentService(AssignmentRepository assignmentRepository, DeviceRepository deviceRepository) {
-        this.assignmentRepository = assignmentRepository;
-        this.deviceRepository = deviceRepository;
-    }
+    @Autowired
+    DeviceRepository deviceRepository;
 
-    @Override
-    public void openAssignment(String patientId) {
+    @GetMapping("/openAssignment")
+    @ResponseBody
+    public String openAssignment(@RequestParam(name="patientId", required=true) String patientId) {
         /*  Since we don't have a patient lookup, let's assume that a patientID is valid as long
-            as it is not empty or null. In real environment we would want to verify that it is indeed a real
-            patient. */
+        as it is not empty or null. In real environment we would want to verify that it is indeed a real
+        patient. */
         if (patientId == null || patientId.isEmpty()) {
             throw new RuntimeException("PatientId cannot be null or empty.");
         }
@@ -41,30 +49,42 @@ public class DefaultAssignmentService implements AssignmentService {
             assignmentRepository.save(newAssignment);
         }catch (Exception e){
             e.printStackTrace();
+            return e.getMessage();
         }
+
+        return "OK";
     }
 
-    @Override
-    public void closeAssignment(String assignmentId) {
-        Assignment assignmentToClose = findAssignment(assignmentId);
+    @GetMapping("/closeAssignment")
+    @ResponseBody
+    public String closeAssignment(@RequestParam(name="assignmentId", required=true) String assignmentId) {
+        DefaultAssignmentService service = new DefaultAssignmentService(assignmentRepository, deviceRepository);
+
+        Assignment assignmentToClose = service.findAssignment(assignmentId);
         assignmentToClose.setClosedTime(new Timestamp(System.currentTimeMillis()));
 
         try {
             assignmentRepository.save(assignmentToClose);
         }catch (Exception e){
             e.printStackTrace();
+            return e.getMessage();
         }
+
+        return "OK";
     }
 
-    @Override
-    public void addDeviceToAssignment(String assignmentId, String deviceId) {
+    @GetMapping("/addDeviceToAssignment")
+    @ResponseBody
+    public String addDeviceToAssignment(@RequestParam(name="assignmentId", required=true)String assignmentId, @RequestParam(name="deviceId", required=true)String deviceId) {
+        DefaultAssignmentService service = new DefaultAssignmentService(assignmentRepository, deviceRepository);
+
         //Ensure that our input data is valid
         if(deviceId == null || deviceId.isEmpty()){
-            throw new RuntimeException("DeviceId cannot be null or empty.");
+            return "DeviceId cannot be null or empty.";
         }
 
         //We will first need to create an assignment and then we can add a device
-        Assignment toAssign = findAssignment(assignmentId);
+        Assignment toAssign = service.findAssignment(assignmentId);
 
         // Device can only be added if it doesn't exist in the db yet or if it's not assigned to another patient
         Device device = null;
@@ -72,6 +92,7 @@ public class DefaultAssignmentService implements AssignmentService {
             device = deviceRepository.findDeviceByID(deviceId);
         }catch(Exception e){
             e.printStackTrace();
+            return e.getMessage();
         }
 
         //No device found, we can add it
@@ -85,11 +106,12 @@ public class DefaultAssignmentService implements AssignmentService {
                 deviceRepository.save(device);
             }catch(Exception e){
                 e.printStackTrace();
+                return e.getMessage();
             }
         }// This is an existing device
         else{
             if(device.getUnassignedTime() == null && device.getAssignedTime() != null) { //check if currently assigned
-                throw new RuntimeException("Cannot add device to assignment as it is already assigned.");
+                return "Cannot add device to assignment as it is already assigned.";
             }else{
                 device.setAssignedTime(new Timestamp(System.currentTimeMillis()));
                 device.setUnassignedTime(null);
@@ -98,74 +120,86 @@ public class DefaultAssignmentService implements AssignmentService {
                     deviceRepository.save(device);
                 }catch(Exception e){
                     e.printStackTrace();
+                    return e.getMessage();
                 }
             }
         }
+
+        return "OK";
     }
 
-    @Override
-    public void removeDeviceFromAssignment(String assignmentId, String deviceId) {
+    @GetMapping("/removeDeviceFromAssignment")
+    @ResponseBody
+    public String removeDeviceFromAssignment(@RequestParam(name="assignmentId", required=true)String assignmentId, @RequestParam(name="deviceId", required=true)String deviceId) {
+        DefaultAssignmentService service = new DefaultAssignmentService(assignmentRepository, deviceRepository);
+
         //Ensure that our input data is valid
         if(deviceId == null || deviceId.isEmpty()){
-            throw new RuntimeException("DeviceId cannot be null or empty.");
+            return "DeviceId cannot be null or empty.";
         }
         // Ensure that our input data is valid
         if (assignmentId == null || assignmentId.isEmpty()) {
-            throw new RuntimeException("AssignmentId cannot be null or empty.");
+            return "AssignmentId cannot be null or empty.";
         }
 
         // Device can only be removed from assignment if it is currently assigned to it
-        Assignment assignment = findAssignment(assignmentId);
+        Assignment assignment = service.findAssignment(assignmentId);
         Device device = null;
 
         try {
             device = deviceRepository.findDeviceByIDAndAssignment(deviceId, assignment);
         }catch (Exception e){
             e.printStackTrace();
+            return e.getMessage();
         }
 
         if(device == null){
-            throw new RuntimeException("Device not assigned to this assignment.");
+            return "Device not assigned to this assignment.";
         }else{
             if(device.getUnassignedTime() != null){
-                throw new RuntimeException("Device has already been unassigned from this assignment");
+                return "Device has already been unassigned from this assignment";
             }else{
                 device.setUnassignedTime(new Timestamp(System.currentTimeMillis()));
                 try{
                     deviceRepository.save(device);
                 }catch(Exception e){
                     e.printStackTrace();
+                    return e.getMessage();
                 }
             }
         }
+
+        return "OK";
     }
 
-    @Override
-    public Assignment findAssignment(String assignmentId) {
+    @GetMapping("/findAssignment")
+    @ResponseBody
+    public String findAssignment(@RequestParam(name="assignmentId", required=true)String assignmentId) {
         // Ensure that our input data is valid
         if (assignmentId == null || assignmentId.isEmpty()) {
-            throw new RuntimeException("AssignmentId cannot be null or empty.");
+            return "AssignmentId cannot be null or empty.";
         }
         Assignment retrieved = null;
 
         try {
-           retrieved = assignmentRepository.findAssignmentById(assignmentId);
+            retrieved = assignmentRepository.findAssignmentById(assignmentId);
         } catch (Exception e){
             e.printStackTrace();
         }
 
         if(retrieved == null){
-            throw new RuntimeException("Cannot find an Assignment with AssignmentId "+assignmentId);
+           return "Cannot find an Assignment with AssignmentId "+assignmentId;
         }
 
-        return retrieved;
+        return retrieved.toString();
     }
 
-    @Override
-    public List<Assignment> findAssignmentsForDevice(String deviceId) {
+    @GetMapping("/findAssignmentsForDevice")
+    @ResponseBody
+    public String findAssignmentsForDevice(@RequestParam(name="deviceId", required=true)String deviceId) {
         //Ensure that our input data is valid
         if(deviceId == null || deviceId.isEmpty()){
-            throw new RuntimeException("DeviceId cannot be null or empty.");
+            return "DeviceId cannot be null or empty.";
         }
 
         /*
@@ -185,16 +219,18 @@ public class DefaultAssignmentService implements AssignmentService {
 
         }catch (Exception e){
             e.printStackTrace();
+            return e.getMessage();
         }
 
-        return assignments;
+        return assignments.toString();
     }
 
-    @Override
-    public List<Assignment> findAssignmentsForPatient(String patientId) {
+    @GetMapping("/findAssignmentsForPatient")
+    @ResponseBody
+    public String findAssignmentsForPatient(@RequestParam(name="patientId", required=true)String patientId) {
         //Ensure that our input data is valid
         if(patientId == null || patientId.isEmpty()){
-            throw new RuntimeException("PatientId cannot be null or empty.");
+           return "PatientId cannot be null or empty.";
         }
 
         List<Assignment> assignments = new ArrayList<>();
@@ -203,12 +239,13 @@ public class DefaultAssignmentService implements AssignmentService {
             assignments = assignmentRepository.findAssignmentsByPatientId(patientId);
         }catch (Exception e){
             e.printStackTrace();
+            return e.getMessage();
         }
 
         if(assignments == null || assignments.size() == 0){
-            throw new RuntimeException("Cannot find an Assignment with PatientID "+patientId);
+            return "Cannot find an Assignment with PatientID "+patientId;
         }
 
-        return assignments;
+        return assignments.toString();
     }
 }

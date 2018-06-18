@@ -25,4 +25,36 @@ public class Device {
     private Timestamp assignedTime;
 
     private Timestamp unassignedTime;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Assignment getAssignment() {
+        return assignment;
+    }
+
+    public void setAssignment(Assignment assignment) {
+        this.assignment = assignment;
+    }
+
+    public Timestamp getAssignedTime() {
+        return assignedTime;
+    }
+
+    public void setAssignedTime(Timestamp assignedTime) {
+        this.assignedTime = assignedTime;
+    }
+
+    public Timestamp getUnassignedTime() {
+        return unassignedTime;
+    }
+
+    public void setUnassignedTime(Timestamp unassignedTime) {
+        this.unassignedTime = unassignedTime;
+    }
 }
